@@ -16,7 +16,6 @@ BLUE = (0, 0, 255)
 SCREEN_WIDTH = 768
 SCREEN_HEIGHT = 512
 
-
 class SpriteSheet(object):
     """ Class used to grab images out of a sprite sheet. """
 

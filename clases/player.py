@@ -1,34 +1,27 @@
 import pygame
-from pygame.locals import (
-    K_UP,
-    K_DOWN,
-    K_LEFT,
-    K_RIGHT,
-    K_ESCAPE,
-    KEYDOWN,
-    QUIT
-)
+
 from clases.spritesheet_functions import SpriteSheet
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, screenW, screenH, wall_group):
+    def __init__(self):
         super().__init__()
         self.image = pygame.image.load("01-generic_cropped.png").convert()
         # self.image.fill(color)
-        self.screenW = screenW
-        self.screenH = screenH
         self.image.set_colorkey((0, 0, 0))
-        self.rect = self.image.get_rect()
         self.change_x = 3
         self.change_y = 3
         self.level = None
-        self.wall_group = wall_group
         # This holds all the images for the animated walk left/right
         # of our player
         self.walking_frames_l = []
         self.walking_frames_r = []
         self.walking_frames_u = []
         self.walking_frames_d = []
+        self.rect = self.image.get_rect()
+        self.wall_group = pygame.sprite.Group()
+        self.level_x_pos = 768
+        self.level_y_pos = 512
+        # por default el player hace spawn fuera de la pantalla
 
         # What direction is the player facing?
         self.direction = "D"
@@ -104,53 +97,79 @@ class Player(pygame.sprite.Sprite):
 
         # Set a reference to the image rect.
         self.rect = self.image.get_rect()
-        self.rect.topleft = [screenW, screenH]
+        self.rect.topleft = [self.level_x_pos, self.level_y_pos]
 
         # Set spawn point
 
-    def move(self, wall_group):
-        self.update(wall_group)
+    def change_spawn_point(self, new_x, new_y):
+        self.level_x_pos = new_x
+        self.level_y_pos = new_y
+        self.rect.topleft = [self.level_x_pos, self.level_y_pos]
+
+    def change_wall_group(self, collision_sprite_array):
+        self.wall_group = collision_sprite_array
+
+    def move(self):
+        # TODO trabajar con las colisiones
+        # where_col = self.update()
+        where_col = 'nan'
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_LEFT] and where_col != 'l':
             self.rect.x -= self.change_x
             pos = self.rect.x
             frame = (pos // 30) % len(self.walking_frames_l)
             self.image = self.walking_frames_l[frame]
-        if keys[pygame.K_RIGHT]:
+        else:
+            pygame.event.set_blocked(pygame.KEYDOWN)
+        if keys[pygame.K_RIGHT] and where_col != 'r':
             self.rect.x += self.change_x
             pos = self.rect.x
             frame = (pos // 30) % len(self.walking_frames_r)
             self.image = self.walking_frames_r[frame]
-        if keys[pygame.K_UP]:
+        else:
+            pygame.event.set_blocked(pygame.KEYDOWN)
+        if keys[pygame.K_UP] and where_col != 'u':
             self.rect.y -= self.change_y
             pos = self.rect.y
             frame = (pos // 30) % len(self.walking_frames_u)
             self.image = self.walking_frames_u[frame]
-        if keys[pygame.K_DOWN]:
+        else:
+            pygame.event.set_blocked(pygame.KEYDOWN)
+        if keys[pygame.K_DOWN] and where_col != 'd':
             self.rect.y += self.change_y
             pos = self.rect.y
             frame = (pos // 30) % len(self.walking_frames_d)
             self.image = self.walking_frames_d[frame]
+        else:
+            pygame.event.set_blocked(pygame.KEYDOWN)
+        if where_col == 'nan':
+            pass
 
-    def check_wall_collision(self, wall_group):
+    def update(self):
+        stat = 'nan'
+        for wall in self.wall_group:
+            if pygame.sprite.collide_rect(self, wall):
+                if self.change_x > 0:
+                    self.rect.right = wall.rect.left
+                    self.change_x = 0
+                    stat = 'r'
+                if self.change_x < 0:
+                    self.rect.left = wall.rect.right
+                    self.change_x = 0
+                    stat = 'l'
+                if self.change_y < 0:
+                    self.rect.bottom = wall.rect.top
+                    self.change_y = 0
+                    stat = 'u'
+                if self.change_y > 0:
+                    self.rect.top = wall.rect.bottom
+                    self.change_y = 0
+                    stat = 'b'
+        return stat
 
-        # See if we hit anything
-        wall_hit_list = pygame.sprite.spritecollide(self, self.wall_group, False)
-        keys = pygame.key.get_pressed()
-        # TODO verificar esto
-        for wall in wall_hit_list:
-            if self.rect.left >= wall.rect.right:
-                if keys[pygame.K_LEFT]:
-                    pygame.event.set_blocked(KEYDOWN)
 
-            #if self.change_x > 0:
-            #elif self.change_x < 0:
-               # self.change_x = 0
-
-            #if self.change_y > 0:
-               # self.change_y = 0
-            #elif self.change_y < 0:
-                #self.change_y = 0
+        # self.rect.y = self.rect.y + self.change_y
+        # self.rect.x += self.change_x
 
 
     # TODO implementar esto when walking in sludge      self.change_x = 0+1

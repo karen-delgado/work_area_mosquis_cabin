@@ -21,6 +21,7 @@ class Level:
         self.wall_group = pygame.sprite.Group()
         self.hitbox_group = pygame.sprite.Group()
         self.exit_level_hitbox = pygame.sprite.Group()
+        self.interactuables = pygame.sprite.Group()
 
         self.did_campsite_initiate = False
         self.did_outside_cabin_initiate = False
@@ -211,11 +212,6 @@ class Level:
         tabletop_inter = Hitbox(90, 82, 133, 184)
         self.hitbox_group.add(tabletop_inter)
 
-        # test
-        testbox = Hitbox(152, 113, 322, 276)
-        testbox.change_color(255, 0, 0)
-        self.hitbox_group.add(testbox)
-
         # Silla abajo
         bottom_chair = Wall(20, 28, 198, 226)
         self.wall_group.add(bottom_chair)
@@ -232,6 +228,10 @@ class Level:
         #self.hitbox_group.add(crab_bucket)
 
         self.player.change_spawn_point(385, 486)
+        # TODO cambia la visibilidad de las figuras
+        #self.all_sprites.add(self.wall_group)
+        #self.all_sprites.add(self.hitbox_group)
+        #self.all_sprites.add(self.exit_level_hitbox)
         self.did_outside_cabin_initiate = True
 
     def main_hub(self):
@@ -252,9 +252,9 @@ class Level:
             # Player
             self.player.move()
             # TODO apagar esto luego de funcionalidad
-            self.wall_group.draw(self.screen)
-            self.hitbox_group.draw(self.screen)
-            self.exit_level_hitbox.draw(self.screen)
+            #self.wall_group.draw(self.screen)
+            #self.hitbox_group.draw(self.screen)
+            #self.exit_level_hitbox.draw(self.screen)
             self.all_sprites.draw(self.screen)
 
             # update the display

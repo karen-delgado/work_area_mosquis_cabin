@@ -1,8 +1,17 @@
 import pygame
+from pygame.locals import (
+    K_UP,
+    K_DOWN,
+    K_LEFT,
+    K_RIGHT,
+    K_ESCAPE,
+    KEYDOWN,
+    QUIT
+)
 from clases.spritesheet_functions import SpriteSheet
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, screenW, screenH, platform_group):
+    def __init__(self, screenW, screenH, wall_group):
         super().__init__()
         self.image = pygame.image.load("01-generic_cropped.png").convert()
         # self.image.fill(color)
@@ -13,7 +22,7 @@ class Player(pygame.sprite.Sprite):
         self.change_x = 3
         self.change_y = 3
         self.level = None
-        self.platform_group = platform_group
+        self.wall_group = wall_group
         # This holds all the images for the animated walk left/right
         # of our player
         self.walking_frames_l = []
@@ -91,7 +100,7 @@ class Player(pygame.sprite.Sprite):
         self.walking_frames_u.append(image)
 
         # Set the image the player starts with
-        self.image = self.walking_frames_d[1]
+        self.image = self.walking_frames_u[1]
 
         # Set a reference to the image rect.
         self.rect = self.image.get_rect()
@@ -99,9 +108,8 @@ class Player(pygame.sprite.Sprite):
 
         # Set spawn point
 
-
-    def move(self, platform_group):
-        self.update(platform_group)
+    def move(self, wall_group):
+        self.update(wall_group)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             self.rect.x -= self.change_x
@@ -124,15 +132,25 @@ class Player(pygame.sprite.Sprite):
             frame = (pos // 30) % len(self.walking_frames_d)
             self.image = self.walking_frames_d[frame]
 
+    def check_wall_collision(self, wall_group):
 
-    def update(self, platform_group):
-        """ Move the player. """
-        # TODO esto esta extraño?
-        if self.change_x > 0:
-            self.direction = "R"
-        elif self.change_x < 0:
-            self.direction = "L"
-        if self.change_y > 0:  # moving down
-            self.direction = "D"
-        elif self.change_y < 0:  # moving up
-            self.direction = "U"
+        # See if we hit anything
+        wall_hit_list = pygame.sprite.spritecollide(self, self.wall_group, False)
+        keys = pygame.key.get_pressed()
+        # TODO verificar esto
+        for wall in wall_hit_list:
+            if self.rect.left >= wall.rect.right:
+                if keys[pygame.K_LEFT]:
+                    pygame.event.set_blocked(KEYDOWN)
+
+            #if self.change_x > 0:
+            #elif self.change_x < 0:
+               # self.change_x = 0
+
+            #if self.change_y > 0:
+               # self.change_y = 0
+            #elif self.change_y < 0:
+                #self.change_y = 0
+
+
+    # TODO implementar esto when walking in sludge      self.change_x = 0+1
